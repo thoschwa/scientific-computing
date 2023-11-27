@@ -21,8 +21,24 @@ class triangle:
 a = line(1,2)
 
 
-def read_mesh(filename, points, triangles, lines):
+def read_mesh(filename, points, triangles, outer_lines, inner_lines):
+    number_index = 0
+    
     with open(filename) as fs:
+        while(fs.readline() != '$PhysicalNames\n'):
+            pass
+        
+        number_of_names = int(fs.readline())
+        
+        for i in range(number_of_names):
+            name_line = fs.readline().split()
+            
+            print(name_line[2])
+            
+            if(name_line[2].startswith("\"in")):
+                number_index = int(name_line[1])
+        
+        
         while(fs.readline() != "$Nodes\n"):
             pass
 
@@ -38,7 +54,7 @@ def read_mesh(filename, points, triangles, lines):
             points.append(point(x,y))
 
 
-        # TODO: discard two lines
+        # TODO: discard two outer_lines
         fs.readline()
         fs.readline()
 
@@ -54,19 +70,24 @@ def read_mesh(filename, points, triangles, lines):
             print(type, end=" ")
 
             # TODO: check the type (either 1 for line or 2 for triangle)
-            # populate the lists lines and triangles
+            # populate the lists outer_lines and triangles
             if type == 1:
-                lines.append(line(int(myline[5]), int(myline[6])))
+                if int(myline[3]) == number_index:
+                    inner_lines.append(line(int(myline[5]), int(myline[6])))
+                else:
+                    outer_lines.append(line(int(myline[5]), int(myline[6])))
             elif type == 2:
                 triangles.append(triangle(int(myline[5]), int(myline[6]), int(myline[7])))
 
 
 points=[]
 triangles=[]
-lines=[]
-read_mesh("custom1.msh", points, triangles, lines)
+outer_lines=[]
+inner_lines=[]
 
-# TODO: plot the triangles, lines, and points
+read_mesh("simple_olat.msh", points, triangles, outer_lines, inner_lines)
+
+# TODO: plot the triangles, outer_lines, and points
 # plot the triangles
 for i in range(len(triangles)):
     x1 = points[triangles[i].i1-1].x
@@ -77,14 +98,23 @@ for i in range(len(triangles)):
     y3 = points[triangles[i].i3-1].y
     plt.plot([x1,x2,x3,x1], [y1,y2,y3,y1], 'b')
 
-# plot the lines
+# plot the outer_lines
 
-for i in range(len(lines)):
-    x1 = points[lines[i].i1-1].x
-    y1 = points[lines[i].i1-1].y
-    x2 = points[lines[i].i2-1].x
-    y2 = points[lines[i].i2-1].y
+for i in range(len(outer_lines)):
+    x1 = points[outer_lines[i].i1-1].x
+    y1 = points[outer_lines[i].i1-1].y
+    x2 = points[outer_lines[i].i2-1].x
+    y2 = points[outer_lines[i].i2-1].y
     plt.plot([x1,x2], [y1,y2], 'r')
+    
+# plot the outer_lines
+
+for i in range(len(inner_lines)):
+    x1 = points[inner_lines[i].i1-1].x
+    y1 = points[inner_lines[i].i1-1].y
+    x2 = points[inner_lines[i].i2-1].x
+    y2 = points[inner_lines[i].i2-1].y
+    plt.plot([x1,x2], [y1,y2], 'g')
 
 # plot the points
 for i in range(len(points)):
