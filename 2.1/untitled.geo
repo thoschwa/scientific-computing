@@ -34,3 +34,15 @@ Curve Loop(1) = {5, 6, -7, -4};
 Curve Loop(2) = {2, 1, 3};
 //+
 Plane Surface(1) = {1, 2};
+//+
+Physical Curve("top", 8) = {6};
+//+
+Physical Curve("left", 9) = {5};
+//+
+Physical Curve("right", 10) = {7};
+//+
+Physical Curve("bottom", 11) = {4};
+//+
+Physical Curve("interior", 12) = {1, 3, 2};
+//+
+MeshSize {6} = 0.05;

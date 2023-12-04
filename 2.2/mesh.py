@@ -85,7 +85,7 @@ triangles=[]
 outer_lines=[]
 inner_lines=[]
 
-read_mesh("simple_olat.msh", points, triangles, outer_lines, inner_lines)
+read_mesh("/Users/thomas/Documents/scientific-computing/2.1/custom_mesh", points, triangles, outer_lines, inner_lines)
 
 # TODO: plot the triangles, outer_lines, and points
 # plot the triangles
