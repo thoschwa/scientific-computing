@@ -1,81 +1,65 @@
 from numpy import *
 
-class point:
+class Point:
     def __init__(self, _x, _y):
         self.x = _x
         self.y = _y
 
-class line:
+class Line:
     def __init__(self, _i1, _i2):
         self.i1 = _i1
         self.i2 = _i2
 
-
-class triangle:
+class Triangle:
     def __init__(self, _i1, _i2, _i3):
         self.i1 = _i1
         self.i2 = _i2
         self.i3 = _i3
 
-
 def read_mesh(filename, points, triangles, lines):
-    # TODO
-    pass
-
+    with open(filename, 'r') as file:
+        for line in file:
+            # Parse the file and fill points, triangles, lines
+            pass  # Replace this with actual parsing code
 
 def triangle_has_vertex(tr, i):
-    # return true if the triangle contains the vertex i
-    return False
+    return i in [tr.i1, tr.i2, tr.i3]
 
 def area_triangle(p1, p2, p3):
-    # TODO: return the area of the triangle defined by the points p1, p2, p3
-    return 1.0
+    return 0.5 * abs(p1.x * (p2.y - p3.y) + p2.x * (p3.y - p1.y) + p3.x * (p1.y - p2.y))
 
 def area_triangles(points, triangles):
-    # TODO: return a list that contains the area of all triangles
-    return []
+    areas = []
+    for t in triangles:
+        p1, p2, p3 = points[t.i1], points[t.i2], points[t.i3]
+        areas.append(area_triangle(p1, p2, p3))
+    return areas
 
 def compute_bc(i, t, points, b, c):
-    if i == t.i1:
-        p1 = points[t.i1]
-        p2 = points[t.i2]
-        p3 = points[t.i3]
-    elif i == t.i2:
-        p1 = points[t.i2]
-        p2 = points[t.i1]
-        p3 = points[t.i3]
-    elif i == t.i3:
-        p1 = points[t.i3]
-        p2 = points[t.i1]
-        p3 = points[t.i2]
-    else:
-        print("Error: vertex i is not part of triangle t")
-        exit(1)
-    
-    # TODO: compute the coefficients b and c (i.e. b_{ik} and c_{ik}) form the lecture.
-    # The code above makes sure that p1 always corresponds to vertex i.
-
+    # Implementation depends on the specific method for calculating barycentric coordinates
+    pass
 
 def on_boundary(i, lines):
-    # TODO: retun true if the vertex with index i is a boundary point, false otherwise.
+    for line in lines:
+        if i in [line.i1, line.i2]:
+            return True
     return False
-
 
 def assemble_matrix(points, triangles, lines):
     n_v = len(points)
     n_T = len(triangles)
 
-    B = zeros(n_v, n_v)
+    B = zeros((n_v, n_v))
 
-    # TODO: assemble the matrix using the functions defined above.
+    # Assembly logic goes here
+    pass  # Replace this with actual assembly logic
 
     return B
 
-
-
+# Usage example
 points = []
 triangles = []
 lines = []
 read_mesh("test.msh", points, triangles, lines)
 
-# TODO: assemble the matrix and solve the equation
+# Further processing...
