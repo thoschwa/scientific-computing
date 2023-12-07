@@ -54,8 +54,8 @@ def read_mesh(filename, points, triangles, lines):
                 triangles.append(triangle(i1, i2, i3))
 
 
-def triangle_has_vertex(tr, i, points):
-    return points[i] in [points[tr.i1 - 1], points[tr.i2 - 1], points[tr.i3 - 1]]
+def triangle_has_vertex(tr, i):
+    return i in [tr.i1 - 1, tr.i2 - 1, tr.i3 - 1]
 
 
 def area_triangle(p1, p2, p3):
@@ -99,9 +99,9 @@ def compute_bc(i, t, points):
     return b, c
 
 
-def on_boundary(i, lines, points):
+def on_boundary(i, lines):
     for line in lines:
-        if i in [points[line.i1 - 1], points[line.i2 - 1]]:
+        if i in [line.i1 - 1, line.i2 - 1] and line.tag in [8, 9, 10, 11]:
             return True
     return False
 
@@ -111,24 +111,24 @@ def assemble_matrix(points, triangles, lines):
     n_T = len(triangles)
 
     B = numpy.zeros((n_v, n_v))
-
+    
     for i in range(n_v):
         H = 0  # area of adjacent triangles for i
         # Iterate over all triangles
         for k in range(n_T):
             # Check if the triangle includes vertex i
-            if triangle_has_vertex(triangles[k], i, points):
+            if triangle_has_vertex(triangles[k], i):
                 H += area_triangle(points[triangles[k].i1 - 1],
                                    points[triangles[k].i2 - 1], 
                                    points[triangles[k].i3 - 1])
 
         # Check if vertex is not on the boundary
-        if not on_boundary(i, lines, points):
+        if not on_boundary(i, lines):
             for j in range(n_v):
                 # Iterate over all triangles
                 for k in range(n_T):
                     # Check if the triangle includes vertices i and j
-                    if triangle_has_vertex(triangles[k], i, points) and triangle_has_vertex(triangles[k], j, points):
+                    if triangle_has_vertex(triangles[k], i) and triangle_has_vertex(triangles[k], j):
                         # Compute contributions to the matrix B
                         b_ik, c_ik = compute_bc(
                             i, triangles[k], points)
@@ -136,7 +136,8 @@ def assemble_matrix(points, triangles, lines):
                             i, triangles[k], points)
                         B[i][j] -= area_triangle(points[triangles[k].i1 - 1], points[triangles[k].i2 - 1], points[triangles[k].i3 - 1]) * (b_ik * b_jk + c_ik * c_jk)
 
-                B[i][j] /= H
+                if H != 0:
+                    B[i][j] /= H
 
     return B
 
@@ -176,20 +177,22 @@ def write_vtk(points, lines, triangles, filename, values):
 points = []
 triangles = []
 lines = []
-read_mesh("../2.1/simple.msh", points, triangles, lines)
+read_mesh("../2.1/simple_olat.msh", points, triangles, lines)
 
 B = assemble_matrix(points, triangles, lines)
 
 # Set simulation parameters
-delta_t = 0.01
+delta_t = 0.001
 num_steps = 100
 
 # Run explicit Euler simulation
 current_temperature = numpy.zeros(len(points))
 next_temperature = numpy.zeros(len(points))
 
-current_temperature[(len(points) + 5) - len(points)] = 1
-current_temperature[len(points) - 1] = 1
+current_temperature[(len(points) + 5) - len(points)] = 200
+current_temperature[len(points) - 1] = 100
+
+write_vtk(points, lines, triangles, "output1.vtk", current_temperature)
 
 for i in range(num_steps):
     next_temperature = current_temperature + \
