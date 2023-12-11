@@ -105,6 +105,14 @@ def on_boundary(i, lines):
             return True
     return False
 
+def get_boundary_indices(lines, boundary):
+    indices = []
+    for line in lines:
+        if line.tag == boundary:
+            indices.append(line.i1 - 1)
+            indices.append(line.i2 - 1)
+    return indices
+
 
 def assemble_matrix(points, triangles, lines):
     n_v = len(points)
@@ -123,7 +131,7 @@ def assemble_matrix(points, triangles, lines):
                                    points[triangles[k].i3 - 1])
 
         # Check if vertex is not on the boundary
-        if not on_boundary(i, lines):
+        if not False:
             for j in range(n_v):
                 # Iterate over all triangles
                 for k in range(n_T):
@@ -174,12 +182,15 @@ def write_vtk(points, lines, triangles, filename, values):
             file.write(f'{values[i]}\n')  # Zero-based index
 
 
+warm_boundary_id = 2
+
 points = []
 triangles = []
 lines = []
 read_mesh("../2.1/simple_olat.msh", points, triangles, lines)
 
 B = assemble_matrix(points, triangles, lines)
+boundary_indices = get_boundary_indices(lines, warm_boundary_id)
 
 # Set simulation parameters
 delta_t = 0.00001
@@ -189,7 +200,8 @@ num_steps = 100000
 current_temperature = numpy.zeros(len(points))
 next_temperature = numpy.zeros(len(points))
 
-current_temperature[:int(len(points)/2)] = 200
+for i in boundary_indices:
+    current_temperature[i] = 500
 
 write_vtk(points, lines, triangles, "output00.vtk", current_temperature)
 
@@ -199,7 +211,7 @@ for i in range(num_steps):
 
     current_temperature = next_temperature.copy()
     
-    if (i % 5000 == 0):
+    if (i % 100 == 0):
         write_vtk(points, lines, triangles, f"output{i}.vtk", current_temperature)
 
 # Write results to VTK file
