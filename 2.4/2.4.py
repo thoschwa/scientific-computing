@@ -182,15 +182,14 @@ read_mesh("../2.1/simple_olat.msh", points, triangles, lines)
 B = assemble_matrix(points, triangles, lines)
 
 # Set simulation parameters
-delta_t = 0.001
-num_steps = 1000
+delta_t = 0.00001
+num_steps = 100000
 
 # Run explicit Euler simulation
 current_temperature = numpy.zeros(len(points))
 next_temperature = numpy.zeros(len(points))
 
-current_temperature[(len(points) + 5) - len(points)] = 200
-current_temperature[len(points) - 1] = 100
+current_temperature[:int(len(points)/2)] = 200
 
 write_vtk(points, lines, triangles, "output00.vtk", current_temperature)
 
@@ -200,7 +199,7 @@ for i in range(num_steps):
 
     current_temperature = next_temperature.copy()
     
-    if (i % 10 == 0):
+    if (i % 5000 == 0):
         write_vtk(points, lines, triangles, f"output{i}.vtk", current_temperature)
 
 # Write results to VTK file
