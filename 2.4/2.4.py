@@ -183,7 +183,7 @@ B = assemble_matrix(points, triangles, lines)
 
 # Set simulation parameters
 delta_t = 0.001
-num_steps = 100
+num_steps = 1000
 
 # Run explicit Euler simulation
 current_temperature = numpy.zeros(len(points))
@@ -192,13 +192,16 @@ next_temperature = numpy.zeros(len(points))
 current_temperature[(len(points) + 5) - len(points)] = 200
 current_temperature[len(points) - 1] = 100
 
-write_vtk(points, lines, triangles, "output1.vtk", current_temperature)
+write_vtk(points, lines, triangles, "output00.vtk", current_temperature)
 
 for i in range(num_steps):
     next_temperature = current_temperature + \
         delta_t * numpy.dot(B, current_temperature)
 
     current_temperature = next_temperature.copy()
+    
+    if (i % 10 == 0):
+        write_vtk(points, lines, triangles, f"output{i}.vtk", current_temperature)
 
 # Write results to VTK file
-write_vtk(points, lines, triangles, "output.vtk", current_temperature)
+write_vtk(points, lines, triangles, f"output{num_steps}.vtk", current_temperature)
