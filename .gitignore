@@ -159,4 +159,5 @@ cython_debug/
 #  option (not recommended) you can uncomment the following to ignore the entire idea folder.
 #.idea/
 
-/2.4/*.vtk
+/2.4/vtk/*
+/2.4_2/vtk/*
