@@ -1,4 +1,6 @@
 import numpy
+import random
+import os
 
 
 class point:
@@ -101,6 +103,7 @@ def compute_bc(i, t, points):
 
 def on_boundary(i, lines):
     for line in lines:
+        #adjust the boundary tags here (boundary tags are defined in the .msh file)
         if i in [line.i1 - 1, line.i2 - 1] and line.tag in [8, 9, 10, 11]:
             return True
     return False
@@ -131,7 +134,7 @@ def assemble_matrix(points, triangles, lines):
                                    points[triangles[k].i3 - 1])
 
         # Check if vertex is not on the boundary
-        if not False:
+        if not on_boundary(i, lines):
             for j in range(n_v):
                 # Iterate over all triangles
                 for k in range(n_T):
@@ -151,6 +154,7 @@ def assemble_matrix(points, triangles, lines):
 
 
 def write_vtk(points, lines, triangles, filename, values):
+    os.makedirs(os.path.dirname(filename), exist_ok=True)
     with open(filename, 'w') as file:
         file.write('# vtk DataFile Version 3.0\n')
         file.write('Mesh data with polygons\n')
@@ -190,7 +194,8 @@ lines = []
 read_mesh("../2.1/simple_olat.msh", points, triangles, lines)
 
 B = assemble_matrix(points, triangles, lines)
-boundary_indices = get_boundary_indices(lines, warm_boundary_id)
+# used to set boundary temperature (can be commented out and you can simply set the temperature for random points)
+# boundary_indices = get_boundary_indices(lines, warm_boundary_id)
 
 # Set simulation parameters
 delta_t = 0.00001
@@ -200,10 +205,15 @@ num_steps = 100000
 current_temperature = numpy.zeros(len(points))
 next_temperature = numpy.zeros(len(points))
 
-for i in boundary_indices:
-    current_temperature[i] = 500
+# Set boundary temperature (can be commented out and you can simply set the temperature for random points)
+# for i in boundary_indices:
+#     current_temperature[i] = 500
+    
+# Set random points temperature
+for i in range(100):
+    current_temperature[random.randint(0, len(points) - 1)] = 500
 
-write_vtk(points, lines, triangles, "output00.vtk", current_temperature)
+write_vtk(points, lines, triangles, "vtk/output00.vtk", current_temperature)
 
 for i in range(num_steps):
     next_temperature = current_temperature + \
@@ -212,7 +222,7 @@ for i in range(num_steps):
     current_temperature = next_temperature.copy()
     
     if (i % 100 == 0):
-        write_vtk(points, lines, triangles, f"output{i}.vtk", current_temperature)
+        write_vtk(points, lines, triangles, f"vtk/output{i}.vtk", current_temperature)
 
 # Write results to VTK file
-write_vtk(points, lines, triangles, f"output{num_steps}.vtk", current_temperature)
+write_vtk(points, lines, triangles, f"vtk/output{num_steps}.vtk", current_temperature)
