@@ -140,26 +140,24 @@ def assemble_matrix(points, triangles, lines):
                     points[triangles[k].i3 - 1],
                 )
 
-        # Check if vertex is not on the boundary
-        if not on_boundary(i, lines):
-            for j in range(n_v):
-                # Iterate over all triangles
-                for k in range(n_T):
-                    # Check if the triangle includes vertices i and j
-                    if triangle_has_vertex(triangles[k], i) and triangle_has_vertex(
-                        triangles[k], j
-                    ):
-                        # Compute contributions to the matrix B
-                        b_ik, c_ik = compute_bc(i, triangles[k], points)
-                        b_jk, c_jk = compute_bc(i, triangles[k], points)
-                        B[i][j] -= area_triangle(
-                            points[triangles[k].i1 - 1],
-                            points[triangles[k].i2 - 1],
-                            points[triangles[k].i3 - 1],
-                        ) * (b_ik * b_jk + c_ik * c_jk)
+        for j in range(n_v):
+            # Iterate over all triangles
+            for k in range(n_T):
+                # Check if the triangle includes vertices i and j
+                if triangle_has_vertex(triangles[k], i) and triangle_has_vertex(
+                    triangles[k], j
+                ):
+                    # Compute contributions to the matrix B
+                    b_ik, c_ik = compute_bc(i, triangles[k], points)
+                    b_jk, c_jk = compute_bc(j, triangles[k], points)
+                    B[i][j] -= area_triangle(
+                        points[triangles[k].i1 - 1],
+                        points[triangles[k].i2 - 1],
+                        points[triangles[k].i3 - 1],
+                    ) * (b_ik * b_jk + c_ik * c_jk)
 
-                if H != 0:
-                    B[i][j] /= H
+            if H != 0:
+                B[i][j] /= H
 
     return B
 
@@ -208,54 +206,54 @@ def write_vtk(points, lines, triangles, filename, values):
 points = []
 triangles = []
 lines = []
-read_mesh("heat_sink.msh", points, triangles, lines)
+read_mesh("heat_sink", points, triangles, lines)
 
 B = assemble_matrix(points, triangles, lines)
-# used to set boundary temperature (can be commented out and you can simply set the temperature for random points)
-# boundary_indices = get_boundary_indices(lines, warm_boundary_id)
 
-# Set simulation parameters
-delta_t = 0.00001
-num_steps = 100000
+delta_t = 0.0001
+num_steps = 10000
+heat_source_temperature = 200
+surrounding_temperature = 20
+heat_conductivity = 0.0001
 
-# Run explicit Euler simulation
 current_temperature = numpy.zeros(len(points))
 next_temperature = numpy.zeros(len(points))
 
-heat_source_temperature = 500
-surrounding_temperature = 100
+for i in range(len(points)):
+    current_temperature[i] = surrounding_temperature
 
-# Set boundary temperature (can be commented out and you can simply set the temperature for random points)
-# for i in boundary_indices:
-#     current_temperature[i] = 500
+cold_boundary_indices = []
+warm_boundary_indices= []
 
-write_vtk(points, lines, triangles, "vtk/output00.vtk", current_temperature)
+for line in lines:
+    point1 = points[line.i1 - 1]
+    point2 = points[line.i2 - 1]
 
-warm_boundary_indices = get_boundary_indices(lines, 19)
-cold_boundary_indices = (
-    get_boundary_indices(lines, 17)
-    + get_boundary_indices(lines, 18)
-    + get_boundary_indices(lines, 20)
-    + get_boundary_indices(lines, 21)
-    + get_boundary_indices(lines, 22)
-)
-
-print("Warm boundary indices:", warm_boundary_indices)
-print("Cold boundary indices:", cold_boundary_indices)
+    if point1.y == 0:
+        warm_boundary_indices.append(line.i1 - 1)
+    else:
+        cold_boundary_indices.append(line.i1 - 1)
+    if point2.y == 0:
+        warm_boundary_indices.append(line.i2 - 1)
+    else:
+        cold_boundary_indices.append(line.i2 - 1)
+                                    
 
 for i in range(num_steps):
+    # Compute next temperature
     next_temperature = current_temperature + delta_t * numpy.dot(B, current_temperature)
 
+    # Apply boundary conditions (heat source)
     for id in warm_boundary_indices:
-        next_temperature[id] = 500
+        next_temperature[id] = heat_source_temperature
 
+    # Apply interaction with surrounding fluid
     for id in cold_boundary_indices:
-        next_temperature[id] = (surrounding_temperature - current_temperature[id]) * 0.5 + current_temperature[id]
+        next_temperature[id] = (surrounding_temperature - next_temperature[id]) * heat_conductivity + next_temperature[id]
 
     current_temperature = next_temperature.copy()
 
     if i % 100 == 0:
         write_vtk(points, lines, triangles, f"vtk/output{i}.vtk", current_temperature)
 
-# Write results to VTK file
 write_vtk(points, lines, triangles, f"vtk/output{num_steps}.vtk", current_temperature)
