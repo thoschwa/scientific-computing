@@ -13,6 +13,7 @@ void memoryBoundCopyBenchmark() {
     auto start = std::chrono::high_resolution_clock::now();
 
     // Perform the memory copy
+    #pragma omp parallel for
     for (int i = 0; i < N; i++) {
         dest[i] = src[i];
     }
@@ -36,6 +37,7 @@ void computeBoundQuadratureBenchmark() {
     auto start = std::chrono::high_resolution_clock::now();
 
     // Perform the quadrature calculation
+    #pragma omp parallel for reduction(+:sum)
     for (int i = 0; i < N; i++) {
         double x = double(i) + double(N);
         sum += cos(x);
