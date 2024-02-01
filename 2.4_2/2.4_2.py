@@ -210,11 +210,11 @@ read_mesh("heat_sink", points, triangles, lines)
 
 B = assemble_matrix(points, triangles, lines)
 
-delta_t = 0.0001
+delta_t = 0.001
 num_steps = 10000
-heat_source_temperature = 200
-surrounding_temperature = 20
-heat_conductivity = 0.0001
+heat_source_temperature = 100
+surrounding_temperature = 25
+heat_conductivity = 0.1
 
 current_temperature = numpy.zeros(len(points))
 next_temperature = numpy.zeros(len(points))
@@ -249,7 +249,7 @@ for i in range(num_steps):
 
     # Apply interaction with surrounding fluid
     for id in cold_boundary_indices:
-        next_temperature[id] = (surrounding_temperature - next_temperature[id]) * heat_conductivity + next_temperature[id]
+        next_temperature[id] = (surrounding_temperature - next_temperature[id]) * heat_conductivity * delta_t + next_temperature[id]
 
     current_temperature = next_temperature.copy()
 
