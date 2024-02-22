@@ -199,11 +199,14 @@ B = assemble_matrix(points, triangles, lines)
 
 # Set simulation parameters
 delta_t = 0.00001
-num_steps = 100000
+num_steps = 1000
 
 # Run explicit Euler simulation
 current_temperature = numpy.zeros(len(points))
 next_temperature = numpy.zeros(len(points))
+
+def manufactured_solution_all_points(points, t):
+    return numpy.array([numpy.sin(p.x) * numpy.sin(p.y) * numpy.exp(-t) for p in points])
 
 # Set boundary temperature (can be commented out and you can simply set the temperature for random points)
 # for i in boundary_indices:
@@ -215,14 +218,29 @@ for i in range(100):
 
 write_vtk(points, lines, triangles, "vtk/output00.vtk", current_temperature)
 
+errors = []
+current_temperature_m = manufactured_solution_all_points(points, 0)
+next_temperature_m = numpy.zeros(len(points))
+
 for i in range(num_steps):
     next_temperature = current_temperature + \
         delta_t * numpy.dot(B, current_temperature)
+    
+    next_temperature_m = current_temperature_m + \
+        delta_t * numpy.dot(B, current_temperature_m)
 
     current_temperature = next_temperature.copy()
+    current_temperature_m = next_temperature_m.copy()
+
+    m_solution = manufactured_solution_all_points(points, delta_t * (i + 1))
+    error = numpy.linalg.norm(current_temperature_m - m_solution, ord=2)
+    errors.append(error)
 
     if (i % 100 == 0):
         write_vtk(points, lines, triangles, f"vtk/output{i}.vtk", current_temperature)
+
+print("Initial error: ", errors[0])
+print("Final error: ", errors[-1])
 
 # Write results to VTK file
 write_vtk(points, lines, triangles, f"vtk/output{num_steps}.vtk", current_temperature)
