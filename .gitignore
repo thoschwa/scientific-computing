@@ -160,4 +160,4 @@ cython_debug/
 #.idea/
 
 /2.4/vtk/*
-/2.6_7/vtk/*
+/2.6_2.7/vtk/*
