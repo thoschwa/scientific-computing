@@ -101,6 +101,18 @@ ax.set_zlabel('Temperature')
 plt.show()
 
 
+# Create a 2D contour plot midway through the simulation
+data_np = np.array(plot_data_half)
+fig, ax = plt.subplots()
+contour = ax.contourf(data_np, cmap='afmhot', levels=100)  # Adjust the number of levels as needed
+ax.set_xlabel('x')
+ax.set_ylabel('y')
+ax.set_title('Temperature Contour Plot')
+cbar = plt.colorbar(contour)
+cbar.set_label('Temperature')
+plt.show()
+
+
 # end plotting
 data_np = np.array(plot_data_end)
 fig = plt.figure()
@@ -112,20 +124,4 @@ ax.plot_surface(xg, yg, data_np, cmap='afmhot')
 ax.set_xlabel('x')
 ax.set_ylabel('y')
 ax.set_zlabel('Temperature')
-plt.show()
-
-data_np = np.array(plot_data_half)
-
-# Create a 2D contour plot
-fig, ax = plt.subplots()
-contour = ax.contourf(data_np, cmap='afmhot', levels=100)  # Adjust the number of levels as needed
-
-ax.set_xlabel('x')
-ax.set_ylabel('y')
-ax.set_title('Temperature Contour Plot')
-
-# Add a colorbar for reference
-cbar = plt.colorbar(contour)
-cbar.set_label('Temperature')
-
 plt.show()
