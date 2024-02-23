@@ -7,7 +7,7 @@ def get_delta_t(delta_x, buffer):
 space_steps = 101
     
 delta_x = 1/(space_steps - 1)
-delta_t = 0.001
+delta_t = get_delta_t(delta_x, 0.5)
 
 time_step_space = 0.3
 
