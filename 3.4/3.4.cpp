@@ -44,7 +44,7 @@ void computeBoundQuadratureBenchmark() {
     auto end = std::chrono::high_resolution_clock::now();
 
     // Calculate the elapsed time
-    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count();
+    auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start).count();
 
     std::cout << "Compute Bound Quadrature Benchmark: " << duration << " milliseconds" << std::endl;
 }

@@ -199,7 +199,7 @@ B = assemble_matrix(points, triangles, lines)
 
 # Set simulation parameters
 delta_t = 0.00001
-num_steps = 1000
+num_steps = 10000
 
 # Run explicit Euler simulation
 current_temperature = numpy.zeros(len(points))
