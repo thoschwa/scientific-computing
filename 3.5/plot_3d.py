@@ -1,6 +1,7 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+#enter for example "plot_data_beginning.txt"
 filename = input("Enter the name of the file: ")
 
 parameters = np.loadtxt(filename, max_rows=1)
