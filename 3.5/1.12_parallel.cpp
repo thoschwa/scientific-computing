@@ -2,6 +2,7 @@
 #include <fstream>
 #include <vector>
 #include <cmath>
+#include <omp.h>
 
 // Function to get delta_t
 double get_delta_t(double delta_x, double buffer) {
@@ -20,8 +21,8 @@ int main() {
     int time_steps = static_cast<int>(std::ceil(time_step_space / delta_t));
 
     // Initialize temperature arrays
-    std::vector<std::vector<double>> current_temperature(space_steps, std::vector<double>(space_steps, 0.0));
-    std::vector<std::vector<double>> next_temperature(space_steps, std::vector<double>(space_steps, 0.0));
+    std::vector<std::vector<double> > current_temperature(space_steps, std::vector<double>(space_steps, 0.0));
+    std::vector<std::vector<double> > next_temperature(space_steps, std::vector<double>(space_steps, 0.0));
 
     // Initialize boundaries
     for (int i = 0; i < space_steps; ++i) {
@@ -54,12 +55,13 @@ int main() {
     }
 
     // Variables to store plot data
-    std::vector<std::vector<double>> plot_data_beginning = current_temperature;
-    std::vector<std::vector<double>> plot_data_half;
-    std::vector<std::vector<double>> plot_data_end;
+    std::vector<std::vector<double> > plot_data_beginning = current_temperature;
+    std::vector<std::vector<double> > plot_data_half;
+    std::vector<std::vector<double> > plot_data_end;
 
     // Heat simulation
     for (int t = 0; t < time_steps; ++t) {
+        #pragma omp parallel for collapse(2)
         for (int i = 1; i < space_steps - 1; ++i) {
             for (int j = 1; j < space_steps - 1; ++j) {
                 next_temperature[i][j] = current_temperature[i][j] +
