@@ -1,8 +1,8 @@
 #!/bin/bash
 
 # Compile the programs
-c++-13 3.4.cpp -o 3.4
-c++-13 -fopenmp 3.4_parallel.cpp -o 3.4_parallel
+c++-13 3.4.cpp -o 3.4 -O3
+c++-13 -fopenmp 3.4_parallel.cpp -o 3.4_parallel -O3
 
 echo "Running serial version"
 ./3.4
